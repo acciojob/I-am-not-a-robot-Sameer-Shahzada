@@ -1,105 +1,106 @@
-//your code here
-// Images
-const images = [
-  "img1",
-  "img2",
-  "img3",
-  "img4",
-  "img5"
-];
+const images = ["img1", "img2", "img3", "img4", "img5"];
 
-// Random duplicate
+// Pick one image to duplicate
 const duplicate = images[Math.floor(Math.random() * images.length)];
-
-let allImages = [...images, duplicate];
+const allImages = [...images, duplicate];
 
 // Shuffle
 allImages.sort(() => Math.random() - 0.5);
 
 const container = document.getElementById("image-container");
-const heading = document.getElementById("h");
 
-heading.innerText =
-  "Please click on the identical tiles to verify that you are not a robot.";
+let selectedTiles = [];
 
-let selected = [];
-
-// Render images
-allImages.forEach((imgName, index) => {
+// Create images
+allImages.forEach((imgClass) => {
   const img = document.createElement("img");
 
-  img.src = `${imgName}.jpg`;
-  img.dataset.value = imgName;
+  img.classList.add(imgClass);
+  img.dataset.value = imgClass;
 
-  // Required classes
-  img.classList.add("img");
+  img.addEventListener("click", () => {
+    if (
+      selectedTiles.includes(img) ||
+      selectedTiles.length >= 2
+    ) {
+      return;
+    }
 
-  if (index === 0) img.classList.add("img1");
-  if (index === 1) img.classList.add("img2");
-  if (index === 2) img.classList.add("img3");
-  if (index === 3) img.classList.add("img4");
-  if (index === 4) img.classList.add("img5");
-  if (index === 5) img.classList.add("img6");
+    img.classList.add("selected");
+    selectedTiles.push(img);
 
-  img.addEventListener("click", function () {
-    if (selected.includes(this) || selected.length === 2) return;
+    showResetButton();
 
-    this.classList.add("selected");
-    selected.push(this);
-
-    showReset();
-
-    if (selected.length === 2) {
-      showVerify();
+    if (selectedTiles.length === 2) {
+      showVerifyButton();
     }
   });
 
   container.appendChild(img);
 });
 
-function showReset() {
+function showResetButton() {
   if (document.getElementById("reset")) return;
 
-  const btn = document.createElement("button");
-  btn.id = "reset";
-  btn.innerText = "Reset";
+  const resetBtn = document.createElement("button");
+  resetBtn.id = "reset";
+  resetBtn.textContent = "Reset";
 
-  btn.addEventListener("click", () => {
-    location.reload();
-  });
+  resetBtn.addEventListener("click", resetSelection);
 
-  document.body.appendChild(btn);
+  document.querySelector("main").appendChild(resetBtn);
 }
 
-function showVerify() {
+function showVerifyButton() {
   if (document.getElementById("verify")) return;
 
-  const btn = document.createElement("button");
-  btn.id = "verify";
-  btn.innerText = "Verify";
+  const verifyBtn = document.createElement("button");
+  verifyBtn.id = "verify";
+  verifyBtn.textContent = "Verify";
 
-  btn.addEventListener("click", verifyTiles);
+  verifyBtn.addEventListener("click", verifySelection);
 
-  document.body.appendChild(btn);
+  document.querySelector("main").appendChild(verifyBtn);
 }
 
-function verifyTiles() {
-  const result = document.createElement("p");
-  result.id = "para";
+function verifySelection() {
+  let para = document.getElementById("para");
+
+  if (!para) {
+    para = document.createElement("p");
+    para.id = "para";
+    document.querySelector("main").appendChild(para);
+  }
 
   if (
-    selected[0].dataset.value ===
-    selected[1].dataset.value
+    selectedTiles[0].dataset.value ===
+    selectedTiles[1].dataset.value
   ) {
-    result.innerText =
+    para.textContent =
       "You are a human. Congratulations!";
   } else {
-    result.innerText =
+    para.textContent =
       "We can't verify you as a human. You selected the non-identical tiles.";
   }
 
-  document.body.appendChild(result);
-
   const verifyBtn = document.getElementById("verify");
+  if (verifyBtn) {
+    verifyBtn.remove();
+  }
+}
+
+function resetSelection() {
+  selectedTiles.forEach((img) =>
+    img.classList.remove("selected")
+  );
+
+  selectedTiles = [];
+
+  const resetBtn = document.getElementById("reset");
+  const verifyBtn = document.getElementById("verify");
+  const para = document.getElementById("para");
+
+  if (resetBtn) resetBtn.remove();
   if (verifyBtn) verifyBtn.remove();
+  if (para) para.remove();
 }
